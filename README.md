@@ -1,2 +1,5 @@
-# appTareas_frontend
-Task gestor app with an innovative design
+# prioritease
+
+A task aplication with innovative design.
+
+Made in Flutter.
