@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-// Include the Google Fonts package to provide more text format options
-// https://pub.dev/packages/google_fonts
 import 'pages/login_page.dart';
-
-
-void main() {
+import 'pages/home.dart';
+import 'utils/token_storage.dart';
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  final tokenStorage = EncryptedTokenStorage();
+  final token = await tokenStorage.getToken();
   runApp(
       MaterialApp(
         title: 'PrioritEase',
@@ -15,6 +17,11 @@ void main() {
             seedColor: Colors.lightBlue.shade300,
           ),
         ),
+        initialRoute: '/login',
+        routes: {
+          '/login': (context) => LoginPage(),
+          '/home': (context) => HomeScreen(),
+        },
         home: Scaffold(
             body: SafeArea(
               child: LoginPage(),
