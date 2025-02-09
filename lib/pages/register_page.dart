@@ -96,6 +96,9 @@ class __TextFieldsState extends State<_TextFields> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  FocusNode usernameFocus = FocusNode();
+  FocusNode emailFocus = FocusNode();
+  FocusNode passwordFocus = FocusNode();
   // Manage the visibility of the password
   bool isObscured = true;
 
@@ -127,6 +130,7 @@ class __TextFieldsState extends State<_TextFields> {
     if (password.length < 8) return "Must be at least 8 characters";
     if (password.length > 100) return "Must be less than 8 characters";
     if (!RegExp(r'[A-Z]').hasMatch(password)) return "Must include an uppercase letter";
+        if (!RegExp(r'[a-z]').hasMatch(password)) return "Must include a lowercase letter";
     return null;
   }
 
@@ -168,6 +172,7 @@ class __TextFieldsState extends State<_TextFields> {
         child: Column(
           children: [
             TextFormField(
+              focusNode: usernameFocus,
               controller: _usernameController,
               validator: _validateUsername,
               decoration: InputDecoration(
@@ -189,9 +194,13 @@ class __TextFieldsState extends State<_TextFields> {
                 labelText: "Username",
               ),
               autovalidateMode: AutovalidateMode.onUserInteraction,
+              onFieldSubmitted: (value){
+                FocusScope.of(context).requestFocus(emailFocus);
+              },
             ),
             const SizedBox(height: 20),
             TextFormField(
+              focusNode: emailFocus,
               controller: _emailController,
               validator: _validateEmail,
               decoration: InputDecoration(
@@ -213,9 +222,13 @@ class __TextFieldsState extends State<_TextFields> {
                 labelText: "Email",
               ),
               autovalidateMode: AutovalidateMode.onUserInteraction,
+              onFieldSubmitted: (value){
+                FocusScope.of(context).requestFocus(passwordFocus);
+              },
             ),
             const SizedBox(height: 20),
             TextFormField(
+              focusNode: passwordFocus,
               obscureText: isObscured,
               controller: _passwordController,
               validator: _validatePassword,

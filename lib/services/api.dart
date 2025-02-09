@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../utils/token_storage.dart';
 
 class AuthService {
-  final String baseUrl = "http://localhost:5000";
+  final String baseUrl = 
+      Platform.isAndroid ? "http://10.0.2.2:5000": "http://localhost:5000";
 
   Future<String?> register(String username, String email, String password) async{
     // Send the credentials that the user wants to register
@@ -30,7 +32,7 @@ class AuthService {
     }
   }
 
-  Future<String?> login(String email, String password) async{
+  Future<String?> login(String email, String password, bool rememberMe) async{
     // Send the credentials that the user wants to login
     var uri = Uri.parse("$baseUrl/prioritease_api/user/login");
     final response = await http.post(
@@ -45,7 +47,7 @@ class AuthService {
     // Manage API responses
     if (response.statusCode == 200) {
       final token = jsonDecode(response.body)['token'];
-      EncryptedTokenStorage().saveToken(token);
+      EncryptedTokenStorage().saveToken(token, rememberMe);
       return null;
     } else if (response.statusCode == 400) {
       return "Faltan campos obligatorios";

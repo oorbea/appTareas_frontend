@@ -17,7 +17,7 @@ Future<void> main() async {
             seedColor: Colors.lightBlue.shade300,
           ),
         ),
-        initialRoute: '/login',
+        initialRoute: token == null ? '/login' : '/home',
         routes: {
           '/login': (context) => LoginPage(),
           '/home': (context) => HomeScreen(),
