@@ -281,8 +281,8 @@ class ForgotPassword extends StatelessWidget {
         padding: const EdgeInsets.all(5.0),
         child: Align(
           alignment: Alignment.centerRight,
-          child: GestureDetector(
-            onTap: () {
+          child: TextButton(
+            onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
