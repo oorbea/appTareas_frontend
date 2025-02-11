@@ -71,7 +71,7 @@ class __LoginFormState extends State<_LoginForm> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 runAlignment: WrapAlignment.center,
                 children: [
-                  const Text("Don't have an account?"),
+                  const Text("¿No tienes una cuenta?"),
                   RegisterButton(),
                 ],
               ),
@@ -113,19 +113,19 @@ class __TextFieldsState extends State<_TextFields> {
 
   /// Function to validate email
   String? _validateEmail(String? email) {
-    if (email == null || email.isEmpty) return "Email is required";
+    if (email == null || email.isEmpty) return "El correo electrónico es obligatorio";
     final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    if (!regex.hasMatch(email)) return "Invalid email";
+    if (!regex.hasMatch(email)) return "Correo electrónico no válido";
     return null;
   }
 
   /// Function to validate password
   String? _validatePassword(String? password) {
-    if (password == null || password.isEmpty) return "Password is required";
-    if (password.length < 8) return "Must be at least 8 characters";
-    if (password.length > 100) return "Must be less than 8 characters";
-    if (!RegExp(r'[A-Z]').hasMatch(password)) return "Must include an uppercase letter";
-    if (!RegExp(r'[a-z]').hasMatch(password)) return "Must include a lowercase letter";
+    if (password == null || password.isEmpty) return "La contraseña es obligatoria";
+    if (password.length < 8) return "Debe tener al menos 8 caracteres";
+    if (password.length > 100) return "Debe tener menos de 100 caracteres";
+    if (!RegExp(r'[A-Z]').hasMatch(password)) return "Debe incluir una letra mayúscula";
+    if (!RegExp(r'[a-z]').hasMatch(password)) return "Debe incluir una letra minúscula";
     return null;
   }
 
@@ -142,7 +142,7 @@ class __TextFieldsState extends State<_TextFields> {
           // Login and navigate to the home page
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Login successful"), backgroundColor: Colors.green),
+              SnackBar(content: Text("Inicio de sesión exitoso"), backgroundColor: Colors.green),
             );
             Navigator.pushReplacement(
               context, 
@@ -194,8 +194,8 @@ class __TextFieldsState extends State<_TextFields> {
                   borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                   borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                 ),
-                hintText: 'Enter your email',
-                labelText: "Email",
+                hintText: 'Ingresa tu correo electrónico',
+                labelText: "Correo electrónico",
               ),
               autovalidateMode: AutovalidateMode.onUserInteraction,
               onFieldSubmitted: (value){
@@ -223,8 +223,8 @@ class __TextFieldsState extends State<_TextFields> {
                   borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                   borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                 ),
-                hintText: 'Enter your password',
-                labelText: "Password",
+                hintText: 'Ingresa tu contraseña',
+                labelText: "Contraseña",
                 suffixIcon: IconButton(
                   icon: Icon(isObscured ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
@@ -243,7 +243,7 @@ class __TextFieldsState extends State<_TextFields> {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   runAlignment: WrapAlignment.center,
                   children: [
-                    const Text("Remember me"),
+                    const Text("Recuérdame"),
                     Switch(
                       // This bool value toggles the switch.
                       value: rememberMe,
@@ -261,7 +261,7 @@ class __TextFieldsState extends State<_TextFields> {
               onPressed: () => {
                 _submitForm()
               }, 
-              child: const Text('Log In')
+              child: const Text('Iniciar sesión')
             ),
           ],
         ),
@@ -290,7 +290,7 @@ class ForgotPassword extends StatelessWidget {
               );
             },
             child: Text(
-              "Forgot my password",
+              "Olvidé mi contraseña",
               style: TextStyle(
                 decoration: TextDecoration.underline,
                 color: Theme.of(context).colorScheme.secondary,
@@ -317,7 +317,7 @@ class _RegisterButtonState extends State<RegisterButton> {
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const RegisterPage()))
       },
-      child: Text("Sign Up",
+      child: Text("Regístrate",
           style: TextStyle(
             fontWeight: FontWeight.w900,
           )),

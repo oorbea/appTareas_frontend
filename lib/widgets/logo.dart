@@ -17,7 +17,7 @@ class Logo extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(vertical: 30.0),
           child: Text(
-            "Welcome to PrioritEase!",
+            "Bienvenido/a to PrioritEase!",
             textAlign: TextAlign.center,
             style: isSmallScreen
                 ? Theme.of(context).textTheme.headlineSmall

@@ -69,7 +69,7 @@ class __RegisterFormState extends State<_RegisterForm> {
             crossAxisAlignment: WrapCrossAlignment.center,
             runAlignment: WrapAlignment.center,
             children: [
-              const Text("Already registered?"),
+              const Text("¿Estás registrado?"),
               LoginButton(),
             ],
           ),
@@ -112,25 +112,25 @@ class __TextFieldsState extends State<_TextFields> {
 
   /// Function to validate username
   String? _validateUsername(String? username) {
-    if (username == null || username.isEmpty) return "username is required";
-    if (username.length > 30) return "Username must be less than 30 characters long";
+    if (username == null || username.isEmpty) return "Se requiere un nombre usuario";
+    if (username.length > 30) return "El usuario debe tener máximo 30 caracteres";
     return null;
   }
   /// Function to validate email
   String? _validateEmail(String? email) {
-    if (email == null || email.isEmpty) return "Email is required";
+    if (email == null || email.isEmpty) return "Email obligatorio";
     final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    if (!regex.hasMatch(email)) return "Invalid email";
+    if (!regex.hasMatch(email)) return "Email inválido";
     return null;
   }
 
   /// Function to validate password
   String? _validatePassword(String? password) {
-    if (password == null || password.isEmpty) return "Password is required";
-    if (password.length < 8) return "Must be at least 8 characters";
-    if (password.length > 100) return "Must be less than 8 characters";
-    if (!RegExp(r'[A-Z]').hasMatch(password)) return "Must include an uppercase letter";
-        if (!RegExp(r'[a-z]').hasMatch(password)) return "Must include a lowercase letter";
+    if (password == null || password.isEmpty) return "Contraseña obligatoria";
+    if (password.length < 8) return "Debe tener al menos 8 caracteres";
+    if (password.length > 100) return "Debe tener menos de 100 caracteres";
+    if (!RegExp(r'[A-Z]').hasMatch(password)) return "Debe incluir una letra mayúscula";
+    if (!RegExp(r'[a-z]').hasMatch(password)) return "Debe incluir una letra minúscula";
     return null;
   }
 
@@ -147,7 +147,7 @@ class __TextFieldsState extends State<_TextFields> {
           // Login and navigate to the home page
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Register successful"), backgroundColor: Colors.green),
+              SnackBar(content: Text("Registro exitoso"), backgroundColor: Colors.green),
             );
           }
         } else {
@@ -190,8 +190,8 @@ class __TextFieldsState extends State<_TextFields> {
                   borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                   borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                 ),
-                hintText: 'Enter your username',
-                labelText: "Username",
+                hintText: 'Ingresa tu nombre de usuario',
+                labelText: "Nombre de usuario",
               ),
               autovalidateMode: AutovalidateMode.onUserInteraction,
               onFieldSubmitted: (value){
@@ -218,8 +218,8 @@ class __TextFieldsState extends State<_TextFields> {
                   borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                   borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                 ),
-                hintText: 'Enter your email',
-                labelText: "Email",
+                hintText: 'Ingresa tu correo electrónico',
+                labelText: "Correo electrónico",
               ),
               autovalidateMode: AutovalidateMode.onUserInteraction,
               onFieldSubmitted: (value){
@@ -247,8 +247,8 @@ class __TextFieldsState extends State<_TextFields> {
                   borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                   borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                 ),
-                hintText: 'Enter your password',
-                labelText: "Password",
+                hintText: 'Ingresa tu contraseña',
+                labelText: "Contraseña",
                 suffixIcon: IconButton(
                   icon: Icon(isObscured ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
@@ -265,7 +265,7 @@ class __TextFieldsState extends State<_TextFields> {
               onPressed: () => {
                 _submitForm()
               },
-              child: Text("Sign Up",
+              child: Text("Registrarse",
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                 )
@@ -294,7 +294,7 @@ class _LoginButtonState extends State<LoginButton> {
       onPressed: () => {
         Navigator.pop(context),
       },
-      child: Text("Log In",
+      child: Text("Iniciar sesión",
         style: TextStyle(
           fontWeight: FontWeight.w900,
         )

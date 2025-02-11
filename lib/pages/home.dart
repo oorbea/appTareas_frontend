@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
             EncryptedTokenStorage().deleteToken();
             Navigator.pop(context);
           }, 
-          child: Text("Go to Login"),
+          child: Text("Ir a inicio de sesión"),
         ),
       ),
     );

@@ -18,7 +18,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final FocusNode _newPasswordFocusNode = FocusNode();
 
   final _formKey = GlobalKey<FormState>();
-  // TODO: Change this condition, unintuitive
   bool codeNotSubmmited = true;
   bool isObscured = true;
   @override
@@ -48,9 +47,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         autofocus: true,
                         controller: _emailController,
                         validator: (email){
-                          if (email == null || email.isEmpty) return "Email is required";
+                          if (email == null || email.isEmpty) return "El correo es obligatorio";
                           final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                          if (!regex.hasMatch(email)) return "Invalid email";
+                          if (!regex.hasMatch(email)) return "Correo inválido";
                           return null;
                         },
                         decoration: InputDecoration(
@@ -68,8 +67,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                             borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                           ),
-                          hintText: 'Enter your email',
-                          labelText: "Email",
+                          hintText: 'Introduce tu correo',
+                          labelText: "Correo",
                         ),
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                       ),
@@ -89,9 +88,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       controller: _resetCodeController,
                       keyboardType: TextInputType.numberWithOptions(signed: false, decimal: false),
                       validator: (value) {
-                        if (value == null || value.isEmpty) return "Code is required";
+                        if (value == null || value.isEmpty) return "El código es obligatorio";
                         final regex = RegExp(r'^[0-9]+$');
-                        if (!regex.hasMatch(value) || value.length != 8) return "Invalid code";
+                        if (!regex.hasMatch(value) || value.length != 8) return "Código inválido";
                         return null;
                       },
                       decoration: InputDecoration(
@@ -109,8 +108,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                           borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                         ),
-                        hintText: 'Enter your code',
-                        labelText: "Code",
+                        hintText: 'Introduce tu código',
+                        labelText: "Código",
                       ),
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onFieldSubmitted: (value){
@@ -123,11 +122,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       obscureText: isObscured,
                       controller: _newPasswordController,
                       validator: (value) {
-                        if (value == null || value.isEmpty) return "Password is required";
-                        if (value.length < 8) return "Must be at least 8 characters";
-                        if (value.length > 100) return "Must be less than 8 characters";
-                        if (!RegExp(r'[A-Z]').hasMatch(value)) return "Must include an uppercase letter";
-                        if (!RegExp(r'[a-z]').hasMatch(value)) return "Must include a lowercase letter";
+                        if (value == null || value.isEmpty) return "La contraseña es obligatoria";
+                        if (value.length < 8) return "Debe tener al menos 8 caracteres";
+                        if (value.length > 100) return "Debe tener menos de 100 caracteres";
+                        if (!RegExp(r'[A-Z]').hasMatch(value)) return "Debe incluir una letra mayúscula";
+                        if (!RegExp(r'[a-z]').hasMatch(value)) return "Debe incluir una letra minúscula";
                         return null;
                       },
                       decoration: InputDecoration(
@@ -145,8 +144,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           borderRadius: const BorderRadius.all(Radius.circular(15.0)),
                           borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                         ),
-                        hintText: 'Enter your new password',
-                        labelText: "Password",
+                        hintText: 'Introduce tu nueva contraseña',
+                        labelText: "Contraseña",
                         suffixIcon: IconButton(
                           icon: Icon(isObscured ? Icons.visibility : Icons.visibility_off),
                           onPressed: () {
@@ -165,17 +164,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             const SizedBox(height: 20.0),
             codeNotSubmmited ? ElevatedButton(
               onPressed: () {
-                // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState!.validate()) {
                   AuthService()
                   .forgotPassword(_emailController.text)
                   .then(
                     (String? errorMessage) {
                       if (errorMessage == null){
-                        // The user exists. Move to the password validation page
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text("We sent a reset code to ${_emailController.text}"),
+                            content: Text("Hemos enviado un código de recuperación a ${_emailController.text}"),
                             backgroundColor: Colors.green,
                           )
                         );
@@ -193,11 +190,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   );                  
                 }
               }, 
-              child: Text("Submit"),
+              child: Text("Enviar"),
             )
             : ElevatedButton(
               onPressed: () {
-                // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState!.validate()) {
                   AuthService()
                   .resetPassword(_emailController.text, int.parse(_resetCodeController.text), _newPasswordController.text)
@@ -206,7 +202,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       if (errorMessage == null){
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text("Password updated successfully"),
+                            content: Text("Contraseña actualizada con éxito"),
                             backgroundColor: Colors.green,
                           )
                         );
@@ -225,7 +221,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   );                  
                 }
               }, 
-              child: Text("Submit code"),
+              child: Text("Enviar código"),
             ),
             const SizedBox(height: 20.0),
             TextButton(
@@ -233,7 +229,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 Navigator.pop(context)
               },
         
-              child: Text("Back to Log In"),
+              child: Text("Volver a Iniciar Sesión"),
             )
           ],
         ),
