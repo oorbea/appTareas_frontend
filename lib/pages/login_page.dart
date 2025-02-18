@@ -130,36 +130,35 @@ class __TextFieldsState extends State<_TextFields> {
   }
 
   /// Function to handle form submission
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      AuthService authService = AuthService();
-      authService.login(
+      final errorMessage = await AuthService().login(
         _emailController.text,
         _passwordController.text,
         rememberMe
-      ).then((String? errorMessage) {
-        if (errorMessage == null) {
-          // Login and navigate to the home page
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Inicio de sesión exitoso"), backgroundColor: Colors.green),
-            );
-            Navigator.pushReplacement(
-              context, 
-              MaterialPageRoute(
-                    builder: (context) => const HomeScreen())
-            );
-          }
-          
-        } else {
-          // Show API error message
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
-            );
-          }
+      );
+      if (errorMessage == null) {
+        // Login and navigate to the home page
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Inicio de sesión exitoso"), backgroundColor: Colors.green),
+          );
+          _emailController.clear();
+          _passwordController.clear();
+          await Navigator.pushReplacement(
+            context, 
+            MaterialPageRoute(
+                  builder: (context) => const HomeScreen())
+          );
         }
-      });
+      } else {
+        // Show API error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+          );
+        }
+      }
     }
   }
 
@@ -238,10 +237,10 @@ class __TextFieldsState extends State<_TextFields> {
             ),
             ForgotPassword(),
             Wrap(
-                  alignment: WrapAlignment.center,
+                  alignment: WrapAlignment.spaceBetween,
                   spacing: 20.0,
                   crossAxisAlignment: WrapCrossAlignment.center,
-                  runAlignment: WrapAlignment.center,
+                  runAlignment: WrapAlignment.spaceEvenly,
                   children: [
                     const Text("Recuérdame"),
                     Switch(
@@ -258,8 +257,8 @@ class __TextFieldsState extends State<_TextFields> {
                   ],
                 ),
             FilledButton(
-              onPressed: () => {
-                _submitForm()
+              onPressed: () async => {
+                await _submitForm()
               }, 
               child: const Text('Iniciar sesión')
             ),
@@ -282,8 +281,8 @@ class ForgotPassword extends StatelessWidget {
         child: Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => const ForgotPasswordPage()),
@@ -313,7 +312,7 @@ class _RegisterButtonState extends State<RegisterButton> {
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () => {
+      onPressed: () async => {
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const RegisterPage()))
       },

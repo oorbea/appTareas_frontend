@@ -135,10 +135,9 @@ class __TextFieldsState extends State<_TextFields> {
   }
 
   /// Function to handle form submission
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      AuthService authService = AuthService();
-      authService.register(
+      await AuthService().register(
         _usernameController.text,
         _emailController.text,
         _passwordController.text,
@@ -262,8 +261,8 @@ class __TextFieldsState extends State<_TextFields> {
             ),
             SizedBox(height: 20.0,),
             ElevatedButton(
-              onPressed: () => {
-                _submitForm()
+              onPressed: () async => {
+                await _submitForm()
               },
               child: Text("Registrarse",
                 style: TextStyle(

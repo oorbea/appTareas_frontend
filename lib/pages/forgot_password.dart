@@ -163,39 +163,34 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
             const SizedBox(height: 20.0),
             codeNotSubmmited ? ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  AuthService()
-                  .forgotPassword(_emailController.text)
-                  .then(
-                    (String? errorMessage) {
-                      if (errorMessage == null){
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Hemos enviado un código de recuperación a ${_emailController.text}"),
-                            backgroundColor: Colors.green,
-                          )
-                        );
-                        setState(() { codeNotSubmmited = false; });
-                      }
-                      else{
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(errorMessage),
-                            backgroundColor: Colors.red,
-                          )
-                        );
-                      }
-                    }
-                  );                  
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {  
+                  final errorMessage = await AuthService()
+                    .forgotPassword(_emailController.text);
+                  if (errorMessage == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                      content: Text("Hemos enviado un código de recuperación a ${_emailController.text}"),
+                      backgroundColor: Colors.green,
+                      )
+                    );
+                    setState(() { codeNotSubmmited = false; });
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                      content: Text(errorMessage),
+                      backgroundColor: Colors.red,
+                      )
+                    );
+                  }
                 }
               }, 
               child: Text("Enviar"),
             )
             : ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  AuthService()
+                  await AuthService()
                   .resetPassword(_emailController.text, int.parse(_resetCodeController.text), _newPasswordController.text)
                   .then(
                     (String? errorMessage) {
@@ -206,8 +201,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             backgroundColor: Colors.green,
                           )
                         );
-                        _resetCodeController.text = "";
-                        _newPasswordController.text = "";
+                        _resetCodeController.clear();
+                        _newPasswordController.clear();
                       }
                       else{
                         ScaffoldMessenger.of(context).showSnackBar(

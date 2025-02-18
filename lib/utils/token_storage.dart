@@ -8,15 +8,15 @@ class EncryptedTokenStorage {
 
   factory EncryptedTokenStorage() => _instance;
   EncryptedTokenStorage._internal();
-
+  // TODO: change this
   // WARNING: Hardcoded encryption key for demonstration purposes only.
   // In production, use a secure key management solution.
   static const String _kEncryptionKeyBase64 = 'ADFGHJKSKDHGBGHDIRHJKDLKDJKDJKDJ';
   final encrypt.Key _key = encrypt.Key.fromBase64(_kEncryptionKeyBase64);
 
-  String? token;
+  String? _token;
 
-  bool isTokenExpired(String token) {
+  bool _isTokenExpired(String token) {
     try {
       final payloadPart = token.split('.')[1];
       final normalized = base64.normalize(payloadPart); // Add padding if needed
@@ -53,7 +53,7 @@ class EncryptedTokenStorage {
 
   Future<void> saveToken(String newToken, bool rememberMe) async {
     final prefs = await SharedPreferences.getInstance();
-    token = newToken; // Keep in memory regardless of rememberMe
+    _token = newToken; // Keep in memory regardless of rememberMe
     
     if (rememberMe) {
       final encryptedToken = encryptToken(newToken);
@@ -64,15 +64,15 @@ class EncryptedTokenStorage {
   }
 
   Future<String?> getToken() async {
-    if (token != null) return token;
+    if (_token != null) return _token;
 
     final prefs = await SharedPreferences.getInstance();
     final encryptedToken = prefs.getString(_tokenKey);
     
     if (encryptedToken != null) {
       try {
-        token = decryptToken(encryptedToken);
-        if (isTokenExpired(token!)) {
+        _token = decryptToken(encryptedToken);
+        if (_isTokenExpired(_token!)) {
           await deleteToken();
           return null;
         }
@@ -80,12 +80,12 @@ class EncryptedTokenStorage {
         await deleteToken(); // Auto-clean invalid tokens
       }
     }
-    return token;
+    return _token;
   }
 
   Future<void> deleteToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
-    token = null;
+    _token = null;
   }
 }
