@@ -17,6 +17,9 @@ dependencies:
   fetch_client: ^1.1.2    # Web
   shared_preferences: ^2.5.1
   encrypt: ^5.0.3
+  image_picker: ^1.1.2
+  mime: ^2.0.0
+  http_parser: ^4.1.2
 
 
 dev_dependencies:
