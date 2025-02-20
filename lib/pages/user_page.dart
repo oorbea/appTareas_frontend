@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:prioritease/pages/home.dart';
 import 'package:prioritease/services/api.dart';
 import 'package:prioritease/utils/token_storage.dart';
 
@@ -31,9 +32,18 @@ class _UserPageState extends State<UserPage> {
     _loadUserEmail();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadUserImage();
+    _loadUserName();
+    _loadUserEmail();
+  }
   void _loadUserImage() async {
-    userImage = await UserAttributes().getUserImage();
-    setState(() {});
+    var receivedImage = await UserAttributes().getUserImage();  
+    setState(() {
+      userImage = receivedImage;                                
+    });
   }
 
   void _loadUserName() async {
@@ -115,7 +125,13 @@ class _UserPageState extends State<UserPage> {
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () => {Navigator.pop(context)},
+                          onPressed: () async {
+                            await Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen()),
+                            );
+                          }, 
                           icon: Icon(Icons.arrow_back),
                         )
                       ],
@@ -136,21 +152,17 @@ class _UserPageState extends State<UserPage> {
                               if (pickedFile != null) {
                                 final errorMessage = await UserAttributes()
                                     .updatePicture(File(pickedFile.path));
-
-                                // Mostrar snackbar con el mensaje de error o éxito
-                                if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(errorMessage ??
-                                        '¡Foto de perfil actualizada con éxito!'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-
                                 if (errorMessage == null) {
-                                  setState(() {
-                                    userImage = Image.file(File(pickedFile.path));
-                                  });
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(errorMessage ??
+                                            '¡Foto de perfil actualizada con éxito!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                  _loadUserImage();
                                 }
                               }
                             },
@@ -286,7 +298,7 @@ class _UserPageState extends State<UserPage> {
                               border: OutlineInputBorder(),
                               suffixIcon: 
                               _descriptionField == "Contraseña" ? IconButton(
-                                icon: Icon(Icons.show_chart),
+                                icon: Icon(Icons.visibility),
                                 onPressed: () => {
                                   setState(() {
                                     _obscureText = !_obscureText;

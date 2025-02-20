@@ -120,12 +120,8 @@ class UserAttributes {
     );
     // Manage API responses
     if (response.statusCode == 200) {
-      return Image.network("$baseUrl/prioritease_api/user/picture",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
-      );
+      // Build the image from the bytes
+      return Image.memory(response.bodyBytes);
     } else {
       return Image.file(File("assets/default_user_icon.jpg"));
     }
@@ -194,7 +190,6 @@ class UserAttributes {
     final token = await EncryptedTokenStorage().getToken();
     request.headers['Authorization'] = "Bearer ${token!}";
     var response = await request.send();
-    
     // Manage API responses
     if (response.statusCode == 200) {
       return null;
