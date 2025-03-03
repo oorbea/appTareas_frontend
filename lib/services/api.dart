@@ -222,3 +222,224 @@ class UserAttributes {
     }
   }
 }
+
+class TaskLists{
+  Future<List<String>> getEnabledTaskLists() async {
+    final token = await EncryptedTokenStorage().getToken();
+    var uri = Uri.parse("$baseUrl/prioritease_api/task_list");
+
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Decodifica la respuesta JSON
+        final List<dynamic> taskLists = json.decode(response.body);
+        final List<String> titles = taskLists.map((taskList) {
+          return taskList['name'] as String;
+        }).toList();
+        return titles;
+      } else {
+        return jsonDecode(response.body)['error'];
+      }
+    } catch (e) {
+      print("Excepción al obtener las listas de tareas: $e");
+    }
+
+    // If something fails, return an empty list
+    return [];
+  }
+
+  Future<String?> createTaskList(String listName) async{
+    final token = await EncryptedTokenStorage().getToken();
+    // Send the credentials that the user wants to login
+    var uri = Uri.parse("$baseUrl/prioritease_api/task_list");
+    final response = await http.post(
+      uri,
+      headers: {"Content-Type": "application/json",
+        "Authorization" : "Bearer $token" },
+      body: jsonEncode({
+        "name" : listName
+      }),
+    );
+    // Manage API responses
+    if (response.statusCode == 201) {
+      return null;
+    } else {
+      final errorMessage = jsonDecode(response.body)['error'];
+      return errorMessage;
+    }
+  }
+
+  Future<int?> nameToIdTaskList(String listName) async{
+    final token = await EncryptedTokenStorage().getToken();
+    // Send the credentials that the user wants to login
+    var uri = Uri.parse("$baseUrl/prioritease_api/task_list/name/$listName");
+    final response = await http.get(
+      uri,
+      headers: {"Content-Type": "application/json",
+        "Authorization" : "Bearer $token" },
+    );
+    // Manage API responses
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['id'] ;
+    } else {
+      final errorMessage = jsonDecode(response.body)['error'];
+      return errorMessage;
+    }
+  }
+
+  Future<String?> disableTaskList(String listName) async{
+    final token = await EncryptedTokenStorage().getToken();
+    // Send the credentials that the user wants to login
+    var uri = Uri.parse("$baseUrl/prioritease_api/task_list/disable/name/$listName");
+    final response = await http.patch(
+      uri,
+      headers: {"Content-Type": "application/json",
+        "Authorization" : "Bearer $token" },
+      body: jsonEncode({
+        "name" : listName
+      }),
+    );
+    // Manage API responses
+    if (response.statusCode == 201) {
+      return null;
+    } else {
+      final errorMessage = jsonDecode(response.body)['error'];
+      return errorMessage;
+    }
+  }
+
+  Future<String?> changeTaskList(String listName, String newListName) async{
+    final token = await EncryptedTokenStorage().getToken();
+    int? id = await nameToIdTaskList(listName);
+    // Send the credentials that the user wants to login
+    var uri = Uri.parse("$baseUrl/prioritease_api/task_list/name/$id");
+    final response = await http.patch(
+      uri,
+      headers: {"Content-Type": "application/json",
+        "Authorization" : "Bearer $token" },
+      body: jsonEncode({
+        "name" : newListName
+      }),
+    );
+    // Manage API responses
+    if (response.statusCode == 200) {
+      return null;
+    } else {
+      final errorMessage = jsonDecode(response.body)['error'];
+      return errorMessage;
+    }
+  }
+  
+}
+
+class TaskAPI{
+  Future<List<Map<String, dynamic>>> getTasksByListName(String listName) async {
+    final token = await EncryptedTokenStorage().getToken();
+
+    // Step 1: Get the task list ID using the list name
+    final listId = await TaskLists().nameToIdTaskList(listName);
+    if (listId == null) {
+      print("No se pudo obtener el ID de la lista de tareas.");
+      return [];
+    }
+
+    // Step 2: Build the URI with the `list` query parameter
+    var uri = Uri.parse("$baseUrl/prioritease_api/task").replace(
+      queryParameters: {
+        "list": listId.toString(), // Filter tasks by the list ID
+      },
+    );
+
+      // Step 3: Make the HTTP request
+      final response = await http.get(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      // Step 4: Handle the response
+      if (response.statusCode == 200) {
+        // Decode the JSON response
+        final List<dynamic> tasks = json.decode(response.body);
+        // Convert the dynamic list to a List<Map<String, dynamic>>
+        return tasks.cast<Map<String, dynamic>>();
+      } else {
+        final errorMessage = jsonDecode(response.body)['error'];
+        return errorMessage;
+      }
+  }
+
+  Future<List<Map<String, dynamic>>> getFavoriteTasks() async {
+    final token = await EncryptedTokenStorage().getToken();
+
+    var uri = Uri.parse("$baseUrl/prioritease_api/task").replace(
+      queryParameters: {
+        "favourite": true, // Filter tasks by the list ID
+      },
+    );
+    final response = await http.get(
+      uri,
+      headers: {
+        "Authorization": "Bearer $token",
+      },
+    );
+    
+    if (response.statusCode == 200) {
+      // Decode the JSON response
+      final List<dynamic> tasks = json.decode(response.body);
+      // Convert the dynamic list to a List<Map<String, dynamic>>
+      return tasks.cast<Map<String, dynamic>>();
+    } else {
+      final errorMessage = jsonDecode(response.body)['error'];
+      return errorMessage;
+    }
+  }
+
+  Future<String?> createTask({
+    required String title,
+    String? details,
+    String? deadline,
+    int? parent,
+    int difficulty = 1,
+    double? lat,
+    double? lng,
+    required int list,
+    bool favourite = false,
+    bool done = false,
+  }) async {
+    final token = await EncryptedTokenStorage().getToken();
+    final response = await http.post(
+      Uri.parse("$baseUrl/prioritease_api/task"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token"
+      },
+      body: jsonEncode({
+        "title": title,
+        "details": details,
+        "deadline": deadline,
+        "parent": parent,
+        "difficulty": difficulty,
+        "lat": lat,
+        "lng": lng,
+        "list": list,
+        "favourite": favourite,
+        "done": done,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return null;
+    } else {
+      final errorMessage = jsonDecode(response.body)['error'];
+      return errorMessage;
+    }
+  }
+}
