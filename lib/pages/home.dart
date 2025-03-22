@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:prioritease/widgets/add_task_button.dart';
 import '../pages/user_page.dart';
 import '../services/api.dart';
 import '../utils/task.dart';
+import '../widgets/task_tile.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -98,7 +100,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 SizedBox(height: 30.0),
-                TasksPage(),
+                Expanded(
+                  child: TasksPage(),
+                ),
               ],
             ),
           ),
@@ -119,7 +123,7 @@ class TasksPage extends StatefulWidget {
 class _TasksPageState extends State<TasksPage> {
   int _value = 0;
   List<String> titles = [];
-  Future<List<Task>>? tasks;
+  List<Task> tasks = [];
 
   final _focusNode = FocusNode();
 
@@ -129,27 +133,26 @@ class _TasksPageState extends State<TasksPage> {
     _getTitles();
   }
 
-  @override
-  void didUpdateWidget(covariant TasksPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    print("Rebuild widget");
-  }
-
   void _getTitles() async {
     List<String> listReceived = await TaskLists().getEnabledTaskLists();
-    setState(() {
+    setState(() { 
       titles = listReceived;
     });
+    _getTasks();
   }
-
-  Future<List<Task>> _getFavoriteTasks() async {
-    List<Map<String, dynamic>> listReceived = await TaskAPI().getFavoriteTasks();
-    return listReceived.map((taskMap) => Task.fromJson(taskMap)).toList();
-  }
-
-  Future<List<Task>> _getTasks(String listName) async {
-    List<Map<String, dynamic>> listReceived = await TaskAPI().getTasksByListName(listName);
-    return listReceived.map((taskMap) => Task.fromJson(taskMap)).toList();
+  void _getTasks() async {
+    List<Map<String, dynamic>> listReceived = [];
+    if(_value == -1){
+      listReceived= await TaskAPI().getFavoriteTasks();
+    }
+    else if (titles.isNotEmpty){
+      listReceived = await TaskAPI().getTasksByListName(titles[_value]);
+    }
+    
+    setState(() {
+      tasks = listReceived.map((taskMap) => Task.fromJson(taskMap)).toList();
+    });
+    
   }
   
   @override
@@ -177,6 +180,7 @@ class _TasksPageState extends State<TasksPage> {
                     setState(() {
                       if(selected) _value = -1;
                     });
+                    _getTasks();
                   },
                 ),
                 Wrap(
@@ -190,53 +194,58 @@ class _TasksPageState extends State<TasksPage> {
                             setState(() {
                               _value = selected ? index : -1;
                             });
+                            _getTasks();
                           },
                         );
                       }).toList(),
                 ),
                 ActionChip(
-            label: Icon(Icons.add), 
-            onPressed: () async {
-              String? newTaskListName = await showDialog<String>(
-                context: context,
-                builder: (BuildContext context) {
-                String taskListName = '';
-                return AlertDialog(
-                title: Text('Introduce el nombre de la lista de tareas'),
-                content: TextField(
-                  autofocus: true,
-                  onChanged: (value) {
-                    taskListName = value;
+                  label: Icon(Icons.add), 
+                  onPressed: () async {
+                    String? newTaskListName = await showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) {
+                      String taskListName = '';
+                      return AlertDialog(
+                      title: Text('Introduce el nombre de la lista de tareas'),
+                      content: TextField(
+                        autofocus: true,
+                        onChanged: (value) {
+                          taskListName = value;
+                        },
+                        onSubmitted: (value) async{
+                          String? error = await TaskLists().createTaskList(taskListName);
+                          if(error == null){
+                            Navigator.of(context).pop(value);
+                            _getTitles();
+                          }
+                        },
+                        decoration: InputDecoration(hintText: "Nombre de la lista"),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('Cancelar'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: Text('OK'),
+                          onPressed: () {
+                            Navigator.of(context).pop(taskListName);
+                          },
+                        ),
+                      ],
+                      );
+                      },
+                    );
+                
+                    if (newTaskListName != null && newTaskListName.isNotEmpty) {
+                      await TaskLists().createTaskList(newTaskListName);
+                      _getTitles();
+                    }
+                
                   },
-                  onSubmitted: (value) {
-                    Navigator.of(context).pop(value);
-                  },
-                  decoration: InputDecoration(hintText: "Nombre de la lista"),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                  child: Text('Cancelar'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  ),
-                  TextButton(
-                  child: Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop(taskListName);
-                  },
-                  ),
-                ],
-                );
-                },
-              );
-          
-              if (newTaskListName != null && newTaskListName.isNotEmpty) {
-                await TaskLists().createTaskList(newTaskListName);
-                _getTitles();
-              }
-          
-            },
           ),
               ],
             ),
@@ -253,15 +262,16 @@ class _TasksPageState extends State<TasksPage> {
                 
                 children: [
                   IconButton(
-                    tooltip: "Edit task list name",
+                    tooltip: "Cambiar nombre de la lista",
                     onPressed: () async {
-                      String? TaskListName = await showDialog<String>(
+                      String? taskListName = await showDialog<String>(
                         context: context,
                         builder: (BuildContext context) {
-                        String taskListName = '';
+                        String taskListName = titles[_value];
                         return AlertDialog(
-                        title: Text('Cambiar el nombre de la lista de tareas'),
+                        title: Text('Cambiar nombre de la lista'),
                         content: TextField(
+                          controller: TextEditingController(text: titles[_value]),
                           autofocus: true,
                           onChanged: (value) {
                             taskListName = value;
@@ -273,24 +283,24 @@ class _TasksPageState extends State<TasksPage> {
                         ),
                         actions: <Widget>[
                           TextButton(
-                          child: Text('Cancelar'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
+                            child: Text('Cancelar'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
                           ),
                           TextButton(
-                          child: Text('OK'),
-                          onPressed: () {
-                            Navigator.of(context).pop(taskListName);
-                          },
+                            child: Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop(taskListName);
+                            },
                           ),
                         ],
                         );
                         },
                       );
                   
-                      if (TaskListName != null && TaskListName.isNotEmpty) {
-                        await TaskLists().changeTaskList(titles[_value],TaskListName);
+                      if (taskListName != null && taskListName.isNotEmpty) {
+                        await TaskLists().changeTaskList(titles[_value],taskListName);
                         _getTitles();
                       }
                   
@@ -322,11 +332,40 @@ class _TasksPageState extends State<TasksPage> {
                   ),
                   if (_value != -1) IconButton(
                     tooltip: "Delete task list name",
-                    onPressed: () async  {
-                      await TaskLists().disableTaskList(titles[_value]);
-                      _getTitles();
-                      titles.isNotEmpty ? _value = 0 : _value = -1;
-                    }, 
+                    onPressed: () async {
+                      String? taskListName = await showDialog<String>(
+                        context: context,
+                        builder: (BuildContext context) {
+                        String taskListName = titles[_value];
+                        return AlertDialog(
+                        title: Text('¿Borrar la lista ${titles[_value]}?'),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text('Cancelar'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: Text('OK'),
+                            onPressed: () async {
+                              await TaskLists().disableTaskList(titles[_value]);
+                              _getTitles();
+                              titles.isNotEmpty ? _value = 0 : _value = -1;
+                              Navigator.of(context).pop(taskListName);
+                            },
+                          ),
+                        ],
+                        );
+                        },
+                      );
+                  
+                      if (taskListName != null && taskListName.isNotEmpty) {
+                        await TaskLists().changeTaskList(titles[_value],taskListName);
+                        _getTitles();
+                      }
+                  
+                    },
                     icon: Icon(
                       Icons.delete,
                       color: Colors.red[300],
@@ -336,45 +375,25 @@ class _TasksPageState extends State<TasksPage> {
               )
             ],
           ),
-          FutureBuilder<List<Task>>(
-            future: tasks, // a previously-obtained Future<String> or null
-            builder: (BuildContext context, AsyncSnapshot<List<Task>> snapshot) {
-              List<Widget> children;
-              if (snapshot.hasData) {
-                children = <Widget>[
-                  const Icon(Icons.check_circle_outline, color: Colors.green, size: 60),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text('Result: ${snapshot.data}'),
-                  ),
-                ];
-              } else if (snapshot.hasError) {
-                children = <Widget>[
-                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text('Error: ${snapshot.error}'),
-                  ),
-                ];
-              } else {
-                children = const <Widget>[
-                  SizedBox(width: 60, height: 60, child: CircularProgressIndicator()),
-                  Padding(padding: EdgeInsets.only(top: 16), child: Text('Awaiting result...')),
-                ];
-              }
-              return Center(
-                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
-              );
-            },
+          Expanded(
+            child: ListView.builder(
+              scrollDirection: Axis.vertical,
+              itemBuilder: (BuildContext context, int index) {
+                var task = tasks[index];
+                return TaskTile(task, onTaskChanged: _getTasks);
+              },
+              itemCount: tasks.length,
+            ),
           ),
-          FloatingActionButton(
-            child: Icon(Icons.add),
-            onPressed: () async{
-              int? list = await TaskLists().nameToIdTaskList(titles[_value]);
-              // Create a task in the list
-              if(list != null) await TaskAPI().createTask(title: "Tarea de prueba", list: list );
-            }
-          )
+          SizedBox(
+            height: 20.0,
+          ),
+          _value != -1 && titles.isNotEmpty ? Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              AddTaskButton(defaultList: titles[_value], refreshTasks: _getTasks)
+            ],
+          ) : SizedBox(height: 20),
         ],
       );
   }

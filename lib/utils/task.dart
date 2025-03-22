@@ -4,24 +4,26 @@ class Task {
   String? details;
   DateTime? deadline;
   Task? parent;
-  int? difficulty;
+  int difficulty;
   double? latitude;
   double? longitude;
-  String? list;
+  int list;
   bool favorite = false;
   bool done = false;
+  int id = 0;
 
   Task({
     required this.title,
     this.details,
     this.deadline,
     this.parent,
-    this.difficulty,
+    required this.difficulty,
     this.latitude,
     this.longitude,
-    this.list,
+    required this.list,
     this.favorite = false,
     this.done = false,
+    this.id = 0
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -33,9 +35,10 @@ class Task {
       difficulty: json['difficulty'],
       latitude: json['lat'],
       longitude: json['lng'],
-      list: json['list']?.toString(),
+      list: json['list'],
       favorite: json['favourite'] ?? false,
       done: json['done'] ?? false,
+      id: json['id']
     );
   }
 

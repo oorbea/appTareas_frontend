@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import '../utils/token_storage.dart';
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
-
+import '../utils/task.dart';
 String getServerUrl() {
   if (kIsWeb) {
     // Running on the web
@@ -123,7 +123,8 @@ class UserAttributes {
       // Build the image from the bytes
       return Image.memory(response.bodyBytes);
     } else {
-      return Image.file(File("assets/default_user_icon.jpg"));
+      // Use AssetImage which works on all platforms
+      return Image.asset("assets/default_user_icon.jpg");
     }
     
   }
@@ -275,7 +276,7 @@ class TaskLists{
     }
   }
 
-  Future<int?> nameToIdTaskList(String listName) async{
+  Future<int> nameToIdTaskList(String listName) async{
     final token = await EncryptedTokenStorage().getToken();
     // Send the credentials that the user wants to login
     var uri = Uri.parse("$baseUrl/prioritease_api/task_list/name/$listName");
@@ -288,8 +289,7 @@ class TaskLists{
     if (response.statusCode == 200) {
       return jsonDecode(response.body)['id'] ;
     } else {
-      final errorMessage = jsonDecode(response.body)['error'];
-      return errorMessage;
+      return -1;
     }
   }
 
@@ -381,13 +381,13 @@ class TaskAPI{
 
     var uri = Uri.parse("$baseUrl/prioritease_api/task").replace(
       queryParameters: {
-        "favourite": true, // Filter tasks by the list ID
-      },
-    );
+          "favourite": "true", // Filter tasks by the list ID
+    });
     final response = await http.get(
       uri,
       headers: {
         "Authorization": "Bearer $token",
+        HttpHeaders.contentTypeHeader: 'application/json',
       },
     );
     
@@ -402,18 +402,7 @@ class TaskAPI{
     }
   }
 
-  Future<String?> createTask({
-    required String title,
-    String? details,
-    String? deadline,
-    int? parent,
-    int difficulty = 1,
-    double? lat,
-    double? lng,
-    required int list,
-    bool favourite = false,
-    bool done = false,
-  }) async {
+  Future<String?> createTask(Task task) async {
     final token = await EncryptedTokenStorage().getToken();
     final response = await http.post(
       Uri.parse("$baseUrl/prioritease_api/task"),
@@ -422,16 +411,16 @@ class TaskAPI{
         "Authorization": "Bearer $token"
       },
       body: jsonEncode({
-        "title": title,
-        "details": details,
-        "deadline": deadline,
-        "parent": parent,
-        "difficulty": difficulty,
-        "lat": lat,
-        "lng": lng,
-        "list": list,
-        "favourite": favourite,
-        "done": done,
+        "title": task.title,
+        if(task.details != null) "details": task.details,
+        if(task.deadline != null) "deadline": task.deadline,
+        if(task.parent != null) "parent": task.parent,
+        "difficulty": task.difficulty,
+        if(task.latitude != null)"lat": task.latitude,
+        if (task.longitude != null) "lng": task.longitude,
+        "list": task.list,
+        "favourite": task.favorite,
+        "done": task.done,
       }),
     );
 
@@ -440,6 +429,54 @@ class TaskAPI{
     } else {
       final errorMessage = jsonDecode(response.body)['error'];
       return errorMessage;
+    }
+  }
+
+  Future<String?> disableTask(Task task) async {
+    final token = await EncryptedTokenStorage().getToken();
+    final response = await http.patch(
+      Uri.parse("$baseUrl/prioritease_api/task/disable/${task.id}"),
+      headers: {"Content-Type": "application/json",
+        "Authorization" : "Bearer $token" },
+    );
+
+    if (response.statusCode == 201) {
+      return null;
+    } else {
+      final errorMessage = jsonDecode(response.body)['error'];
+      return errorMessage;
+    }
+  }
+
+  Future<String?> updateTask(Task newTask) async {
+    final token = await EncryptedTokenStorage().getToken();
+    var uri = Uri.parse("$baseUrl/prioritease_api/task/${newTask.id}");
+
+    final response = await http.put(
+      uri,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "title": newTask.title,
+        if(newTask.details != null) "details": newTask.details,
+        if(newTask.deadline != null) "deadline": newTask.deadline,
+        if(newTask.parent != null) "parent": newTask.parent,
+        "difficulty": newTask.difficulty,
+        if(newTask.latitude != null)"lat": newTask.latitude,
+        if (newTask.longitude != null) "lng": newTask.longitude,
+        "list": newTask.list,
+        "favourite": newTask.favorite,
+        "done": newTask.done,
+      }),
+    );
+    
+    // Manage API responses
+    if (response.statusCode == 200) {
+      return null;
+    } else {
+      return jsonDecode(response.body)['error'];
     }
   }
 }
