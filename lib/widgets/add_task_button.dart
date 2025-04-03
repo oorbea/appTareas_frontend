@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import '../utils/task.dart';
 import '../services/api.dart';
+import '../utils/date.dart';
 class AddTaskButton extends StatelessWidget {
   final String defaultList;
   final Function refreshTasks;
@@ -54,9 +55,9 @@ class AddTaskButton extends StatelessWidget {
 
 class AddTaskPage extends StatefulWidget {
   final String defaultList;
-  var refreshTasks;
+  final Function refreshTasks;
   
-  AddTaskPage(this.defaultList, this.refreshTasks, {super.key});
+  const AddTaskPage(this.defaultList, this.refreshTasks, {super.key});
 
   @override
   State<AddTaskPage> createState() => _AddTaskPageState();
@@ -65,11 +66,30 @@ class AddTaskPage extends StatefulWidget {
 class _AddTaskPageState extends State<AddTaskPage> {
 
   final _formKey = GlobalKey<FormState>();
+  final difficultyList = ["Muy Fácil", "Fácil", "Medio", "Difícil", "Muy difícil"];
   TextEditingController titleController = TextEditingController();
   TextEditingController detailsController = TextEditingController();
+  DateTime? selectedDate;
   double _currentDifficulty = 1;
   double? lat;
   double? long;
+
+  
+
+  Future<void> _selectDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      // Allow only 3 years later
+      lastDate: DateTime(DateTime.now().year + 3),
+    );
+
+    setState(() {
+      selectedDate = pickedDate;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -128,7 +148,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                           min: 1,
                           max: 5,
                           divisions: 4,
-                          label: _currentDifficulty.round().toString(),
+                          label: difficultyList[_currentDifficulty.round() - 1],
                           onChanged: (double value) {
                             setState(() {
                               _currentDifficulty = value;
@@ -138,6 +158,20 @@ class _AddTaskPageState extends State<AddTaskPage> {
                       ),
                     ],
                   ),
+                  SizedBox(height: 20,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                        selectedDate == null 
+                        ? Text("Fecha no seleccionada") 
+                        : Text("Fecha: ${formatDate(selectedDate!)}"),
+                      FilledButton(
+                        onPressed: _selectDate,
+                        child: Text("Seleccionar Fecha"),
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 30),
                   FilledButton(
                     onPressed: () async{
                       Task task = Task(
@@ -150,9 +184,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         list: await TaskLists().nameToIdTaskList(widget.defaultList),
                         favorite: false,
                         done: false,
+                        deadline: selectedDate
                       );
                       await TaskAPI().createTask(task);
                       widget.refreshTasks();
+                      Navigator.pop(context);
                     }, 
                     child: Text("Crear Tarea")
                   )

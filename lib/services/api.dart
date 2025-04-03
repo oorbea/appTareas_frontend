@@ -413,7 +413,7 @@ class TaskAPI{
       body: jsonEncode({
         "title": task.title,
         if(task.details != null) "details": task.details,
-        if(task.deadline != null) "deadline": task.deadline,
+        if(task.deadline != null) "deadline": "${task.deadline!.year}-${task.deadline!.month.toString().padLeft(2, '0')}-${task.deadline!.day.toString().padLeft(2, '0')}",
         if(task.parent != null) "parent": task.parent,
         "difficulty": task.difficulty,
         if(task.latitude != null)"lat": task.latitude,
@@ -461,7 +461,7 @@ class TaskAPI{
       body: jsonEncode({
         "title": newTask.title,
         if(newTask.details != null) "details": newTask.details,
-        if(newTask.deadline != null) "deadline": newTask.deadline,
+        if(newTask.deadline != null) "deadline": "${newTask.deadline!.year}-${newTask.deadline!.month.toString().padLeft(2, '0')}-${newTask.deadline!.day.toString().padLeft(2, '0')}",
         if(newTask.parent != null) "parent": newTask.parent,
         "difficulty": newTask.difficulty,
         if(newTask.latitude != null)"lat": newTask.latitude,

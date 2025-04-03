@@ -375,16 +375,23 @@ class _TasksPageState extends State<TasksPage> {
               )
             ],
           ),
+          SizedBox(height: 20),
           Expanded(
             child: ListView.builder(
               scrollDirection: Axis.vertical,
               itemBuilder: (BuildContext context, int index) {
                 var task = tasks[index];
-                return TaskTile(task, onTaskChanged: _getTasks);
+                return Column(
+                  children: [
+                    TaskTile(task, onTaskChanged: _getTasks),
+                    SizedBox(height: 10),
+                  ],
+                );
               },
               itemCount: tasks.length,
             ),
           ),
+          Divider(),
           SizedBox(
             height: 20.0,
           ),
